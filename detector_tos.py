@@ -83,8 +83,8 @@ print("Finish training")
 
 
 
-input_folder_tos = 'C:\\Users\\max29\\Downloads\\tos\\prueba'
-#input_folder_no_tos = 'C:\\Users\\max29\\Downloads\\tos\\prueba\\notos'
+input_folder_tos = './detector-de-tos-markov'
+
 
 real = []
 predicted = []
