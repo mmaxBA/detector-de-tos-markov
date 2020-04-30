@@ -64,7 +64,6 @@ X = np.array([])
 
 # Parse the input directory
 for filename in os.listdir(input_folder):
-    print(filename)
     # Read the input file
     filepath = os.path.join(input_folder, filename)
     sampling_freq, audio = wavfile.read(filepath)
@@ -75,24 +74,56 @@ for filename in os.listdir(input_folder):
         X = mfcc_features
     else:
         X = np.append(X, mfcc_features, axis=0)
-
 print('X.shape =', X.shape)
 # Train and save HMM model
-hmm_trainer = HMMTrainer(n_components=15)
+hmm_trainer = HMMTrainer(n_components=1)
 print("Start training")
 hmm_trainer.train(X)
 print("Finish training")
 
 
 
-input_folder = 'C:\\Users\\max29\\Downloads\\tos\\prueba'
+input_folder_tos = 'C:\\Users\\max29\\Downloads\\tos\\prueba'
+#input_folder_no_tos = 'C:\\Users\\max29\\Downloads\\tos\\prueba\\notos'
 
+real = []
+predicted = []
 
-for filename in os.listdir(input_folder):
-    print(filename)
-    filepath = os.path.join(input_folder, filename)
-    sampling_freq, audio = wavfile.read(filepath)
-    mfcc_features = mfcc(audio, sampling_freq, nfft=1200)
+max_score = -9999999999999999999
 
-    score = hmm_trainer.get_score(mfcc_features)
-    print("score: {}".format(score))
+for dir in os.listdir(input_folder_tos):
+    directory = os.path.join(input_folder_tos, dir)
+    for filename in os.listdir(directory):
+        filepath = os.path.join(directory, filename)
+        sampling_freq, audio = wavfile.read(filepath)
+        mfcc_features = mfcc(audio, sampling_freq, nfft=1200)
+        score = hmm_trainer.get_score(mfcc_features)
+        if score > max_score:
+            max_score = score
+
+for dir in os.listdir(input_folder_tos):
+    directory = os.path.join(input_folder_tos, dir)
+    for filename in os.listdir(directory):
+        filepath = os.path.join(directory, filename)
+        sampling_freq, audio = wavfile.read(filepath)
+        mfcc_features = mfcc(audio, sampling_freq, nfft=1200)
+        score = hmm_trainer.get_score(mfcc_features)
+        if dir == "notos":
+            print(score)
+            real_output = "No Cough"
+        else:
+            real_output = "Cough"
+        output = "Cough"
+        if (score * 100) / max_score > 55:
+            max_score = score
+            output = "No Cough"
+        predicted.append(output)
+        real.append(real_output)
+
+cm = confusion_matrix(real, predicted)
+np.set_printoptions(precision=2)
+classes = ["Cough","No Cough"]
+plt.figure()
+plot_confusion_matrix(cm, classes=classes, normalize=True, title='Normalized confusion matrix')
+
+plt.show()
