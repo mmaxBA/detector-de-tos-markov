@@ -1,3 +1,9 @@
+# Emanuel Estrada
+# Maximo Bautista
+# Sebastian Cedeño
+# Georgina González
+# Francisco Márquez
+
 from python_speech_features import mfcc, logfbank
 from scipy.io import wavfile
 import numpy as np
@@ -48,11 +54,9 @@ def plot_confusion_matrix():
             c = round(conf_matrix[j,i], 5)
             plt.text(i, j, str(c), va='center', ha='center')
 
-    plt.show()
-
 
 hmm_models = []
-input_folder = '../detector-de-tos-markov/entrenamiento'
+input_folder = '/private/tmp/detector-de-tos-markov/entrenamiento'
 
 X = np.array([])
 
@@ -76,7 +80,7 @@ print("Start training")
 hmm_trainer.train(X)
 print("Finish training")
 
-input_folder_tos = '../detector-de-tos-markov/prueba'
+input_folder_tos = '/private/tmp/detector-de-tos-markov/prueba'
 
 real = []
 predicted = []
@@ -85,8 +89,6 @@ TP = 0
 FP = 0
 FN = 0
 TN = 0
-
-n = 0
 
 max_score = -9999999999999999999
 
@@ -120,8 +122,6 @@ for dir in os.listdir(input_folder_tos):
         predicted.append(output)
         real.append(real_output)
 
-        n += 1
-
         print("\nPREDICTED::", output)
         print("ACTUAL_VALUE:", real_output)
 
@@ -138,7 +138,25 @@ for dir in os.listdir(input_folder_tos):
             FP += 1
             print("-> FALSE POSITIVE")
 
+print()
 
-conf_matrix = np.matrix([[TP/n, FP/n], [FN/n, TN/n]])
+conf_matrix = np.matrix([[TP/(TP+FP), FP/(TP+FP)], [FN/(FN+TN), TN/(FN+TN)]])
 print("\n", conf_matrix)
 plot_confusion_matrix()
+
+TP = conf_matrix[0,0]
+FP = conf_matrix[0,1]
+FN = conf_matrix[1,0]
+TN = conf_matrix[1,1]
+
+acc = (TP + TN) / (TP + FP + FN + TN)
+rec = TP / (TP + FN)
+pre = TP / (TP + FP)
+fms = (2 * rec * pre) / (rec + pre)
+
+print('\nAccuracy =', acc)
+print('Recall =', rec)
+print('Presicion =', pre)
+print('F-measure =', fms)
+
+plt.show()
